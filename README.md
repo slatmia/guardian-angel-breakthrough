@@ -171,9 +171,50 @@ Contributions welcome! Areas for improvement:
 - Documentation enhancements
 - Test coverage
 
+## ⚠️ DISCLAIMER
+
+**Guardian Angel Breakthrough v2.0 is provided "AS IS" for research and educational purposes.**
+
+While trained to 0.98+ emotional intelligence scores:
+- ✅ Outputs may not always be accurate or appropriate
+- ✅ Users are solely responsible for validating all outputs
+- ✅ Not a substitute for professional advice (medical, legal, financial, etc.)
+- ✅ Test thoroughly before any production use
+- ✅ The authors assume no liability for damages resulting from use
+
+**Known Limitations:**
+- Trained on 17 examples - may not cover all scenarios
+- Based on Gemma-3 base model - inherits any base model limitations
+- Emotional intelligence scores (0.98+) measured on training data only
+- Real-world performance may vary
+- May produce plausible-sounding but incorrect information
+- Not suitable for safety-critical applications without extensive validation
+
+**USE AT YOUR OWN RISK.**
+
+## 🚨 IMPORTANT USAGE NOTES
+
+### This model is trained for:
+✅ Coding assistance with empathetic responses  
+✅ Educational purposes and learning  
+✅ Research into emotional AI systems  
+
+### This model is NOT:
+❌ A substitute for mental health professionals  
+❌ Guaranteed to be factually correct in all cases  
+❌ Suitable for safety-critical applications without validation  
+❌ Free from bias, errors, or limitations  
+❌ Appropriate for providing medical, legal, or financial advice  
+
 ## 📄 License
 
 This model is subject to the Gemma Terms of Use. See [Gemma License](https://ai.google.dev/gemma/terms).
+
+**Additional Terms:**
+- Base model (Gemma-3) provided by Google under Gemma Terms of Use
+- LoRA training and enhancements provided "AS IS" without warranty
+- Users accept all risks associated with use and distribution
+- See sections 4.3 and 4.4 of Gemma Terms for warranty disclaimers and liability limitations
 
 ## 🙏 Acknowledgments
 
