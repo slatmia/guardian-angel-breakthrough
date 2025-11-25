@@ -1,0 +1,7 @@
+{
+  "base_model": "gemma3-custom:latest",
+  "lora_rank": 64,
+  "lora_alpha": 128,
+  "training_score": 0.924,
+  "num_parameters": 1574662
+}
