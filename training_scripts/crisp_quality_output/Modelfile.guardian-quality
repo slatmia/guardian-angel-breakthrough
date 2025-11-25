@@ -1,0 +1,28 @@
+FROM guardian-angel:breakthrough-v2
+
+# === INFERENCE TUNING ===
+PARAMETER num_ctx 4096
+PARAMETER temperature 0.7
+PARAMETER top_p 0.9
+PARAMETER top_k 40
+PARAMETER num_predict 2048
+PARAMETER repeat_penalty 1.1
+PARAMETER stop <end_of_turn>
+
+# === SYSTEM PROMPT (COMPRESSED) ===
+SYSTEM """Guardian-Quality v1.0 | Code Quality Specialist | Stats: 0.873/91.7% (22/24)
+
+Enforce: SOLID (SRP,OCP,DIP), Complexity↓, Design Patterns, Code Smells, Readability, Testability
+Tone: Concise, authoritative, pattern-aware. Suggest specific refactorings with before/after.
+Avoid: Generic advice, GA violations, untestable examples.
+"""
+
+# === DEPLOYMENT METADATA ===
+# Base: guardian-angel:breakthrough-v2
+# Training: 2 iterations, 24 examples, Plateau @ iter2
+# Model: Gemma-3 4B Q4_K_M, LoRA adapters merged
+# Ollama: v0.12.11 (RoPE scaling managed internally)
+# Optimized for: 16GB RAM, CPU inference, Ryzen 7 2700
+# Architecture: Sparse Global Attention + LoRA
+# Acceptance Rate: 91.7% | Avg Quality Score: 0.873
+# Note: RoPE scaling (YARN) handled by Ollama runtime, not Modelfile params

@@ -1,0 +1,156 @@
+// LEGACY MONOLITHIC FUNCTION - NEEDS REFACTORING
+public class OrderProcessor {
+    public void ProcessOrder(string user, List<Item> items, decimal discount, 
+                            string promoCode, bool isVIP, string shippingMethod,
+                            string paymentType, string currency, string region) {
+        
+        // Validation logic mixed with business logic
+        if (string.IsNullOrEmpty(user)) throw new Exception("Invalid user");
+        if (items == null || items.Count == 0) throw new Exception("No items");
+        if (discount < 0 || discount > 100) throw new Exception("Invalid discount");
+        
+        // Database connection logic embedded
+        var connectionString = ConfigurationManager.ConnectionStrings["Main"].ConnectionString;
+        using (var conn = new SqlConnection(connectionString)) {
+            conn.Open();
+            
+            // Logging mixed in
+            Console.WriteLine($"Processing order for {user}");
+            File.AppendAllText("log.txt", $"{DateTime.Now}: Order start for {user}\n");
+            
+            // Promo code validation with hardcoded business rules
+            decimal promoDiscount = 0;
+            if (!string.IsNullOrEmpty(promoCode)) {
+                if (promoCode == "SUMMER2024") promoDiscount = 20;
+                else if (promoCode == "VIP30") promoDiscount = 30;
+                else if (promoCode == "FIRST10") promoDiscount = 10;
+            }
+            
+            // VIP logic scattered throughout
+            if (isVIP) {
+                promoDiscount += 5;
+                shippingMethod = "Express";
+            }
+            
+            // Calculate total with mixed concerns
+            decimal subtotal = 0;
+            foreach (var item in items) {
+                subtotal += item.Price * item.Quantity;
+                
+                // Inventory check embedded in loop
+                var cmd = new SqlCommand($"SELECT Stock FROM Inventory WHERE ProductId={item.Id}", conn);
+                var stock = (int)cmd.ExecuteScalar();
+                if (stock < item.Quantity) {
+                    throw new Exception($"Insufficient stock for {item.Name}");
+                }
+                
+                // Update inventory in same transaction
+                var updateCmd = new SqlCommand($"UPDATE Inventory SET Stock=Stock-{item.Quantity} WHERE ProductId={item.Id}", conn);
+                updateCmd.ExecuteNonQuery();
+            }
+            
+            // Tax calculation with hardcoded rates
+            decimal taxRate = 0;
+            if (region == "US") taxRate = 0.08m;
+            else if (region == "EU") taxRate = 0.20m;
+            else if (region == "UK") taxRate = 0.15m;
+            decimal tax = subtotal * taxRate;
+            
+            // Apply discounts
+            decimal finalDiscount = discount + promoDiscount;
+            if (finalDiscount > 50) finalDiscount = 50; // Max discount cap
+            decimal discountAmount = subtotal * (finalDiscount / 100);
+            
+            // Shipping calculation embedded
+            decimal shippingCost = 0;
+            if (shippingMethod == "Standard") shippingCost = 5.99m;
+            else if (shippingMethod == "Express") shippingCost = 15.99m;
+            else if (shippingMethod == "Overnight") shippingCost = 29.99m;
+            
+            // Currency conversion logic mixed in
+            decimal conversionRate = 1.0m;
+            if (currency == "EUR") conversionRate = 0.85m;
+            else if (currency == "GBP") conversionRate = 0.73m;
+            else if (currency == "JPY") conversionRate = 110.0m;
+            
+            decimal total = (subtotal - discountAmount + tax + shippingCost) * conversionRate;
+            
+            // Payment processing embedded
+            bool paymentSuccess = false;
+            if (paymentType == "CreditCard") {
+                // Call credit card API
+                var apiUrl = "https://payment-api.com/charge";
+                using (var client = new WebClient()) {
+                    var response = client.UploadString(apiUrl, $"{{amount:{total},user:{user}}}");
+                    paymentSuccess = response.Contains("success");
+                }
+            } else if (paymentType == "PayPal") {
+                // Call PayPal API
+                var apiUrl = "https://api.paypal.com/charge";
+                using (var client = new WebClient()) {
+                    var response = client.UploadString(apiUrl, $"{{amount:{total},user:{user}}}");
+                    paymentSuccess = response.Contains("COMPLETED");
+                }
+            }
+            
+            if (!paymentSuccess) {
+                throw new Exception("Payment failed");
+            }
+            
+            // Save order to database
+            var insertCmd = new SqlCommand(@"INSERT INTO Orders (User, Total, Status, Date) 
+                                            VALUES (@user, @total, 'Completed', @date)", conn);
+            insertCmd.Parameters.AddWithValue("@user", user);
+            insertCmd.Parameters.AddWithValue("@total", total);
+            insertCmd.Parameters.AddWithValue("@date", DateTime.Now);
+            insertCmd.ExecuteNonQuery();
+            
+            // Email notification logic embedded
+            var emailBody = $"Order confirmed! Total: {total:C} {currency}";
+            var smtp = new SmtpClient("smtp.gmail.com") {
+                Port = 587,
+                Credentials = new NetworkCredential("admin@company.com", "password123"),
+                EnableSsl = true
+            };
+            smtp.Send("admin@company.com", user, "Order Confirmation", emailBody);
+            
+            // PDF generation mixed in
+            var pdfPath = $"invoice_{user}_{DateTime.Now.Ticks}.pdf";
+            var pdfContent = $"INVOICE\n\nUser: {user}\nItems: {items.Count}\nTotal: {total:C}";
+            File.WriteAllText(pdfPath, pdfContent);
+            
+            // SMS notification
+            var smsApi = "https://sms-api.com/send";
+            using (var client = new WebClient()) {
+                client.UploadString(smsApi, $"{{phone:{user},message:'Order confirmed'}}");
+            }
+            
+            // Audit log with complex formatting
+            var auditEntry = $"{DateTime.Now}|{user}|Order|{total}|{paymentType}|{shippingMethod}|Success";
+            File.AppendAllText("audit.log", auditEntry + "\n");
+            
+            // Analytics tracking
+            var analyticsUrl = "https://analytics.com/track";
+            using (var client = new WebClient()) {
+                client.UploadString(analyticsUrl, $"{{event:'order',user:{user},total:{total}}}");
+            }
+            
+            // Cache invalidation
+            var cacheKey = $"user_orders_{user}";
+            MemoryCache.Default.Remove(cacheKey);
+            
+            // Success logging
+            Console.WriteLine($"Order completed for {user}: {total:C}");
+            File.AppendAllText("log.txt", $"{DateTime.Now}: Order success for {user}\n");
+        }
+    }
+}
+
+This function violates multiple SOLID principles:
+1. Single Responsibility - handles validation, DB, payment, email, SMS, PDF, logging, caching, analytics
+2. Open/Closed - hardcoded business rules, can't extend without modifying
+3. Dependency Inversion - depends on concrete implementations (SqlConnection, SmtpClient, WebClient)
+4. High coupling - everything is tightly coupled
+5. Low cohesion - unrelated concerns mixed together
+
+Refactor this following SOLID principles with proper separation of concerns.

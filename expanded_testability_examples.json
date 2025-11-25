@@ -1,0 +1,110 @@
+[
+  {
+    "prompt": "Refactor this hard-to-test payment function",
+    "original_code": "public class PaymentHandler { public bool Process(string card, decimal amount) { var gateway = new PaymentGateway(); return gateway.Charge(card, amount); } }",
+    "issues": ["tight_coupling", "untestable", "hidden_dependency", "violates_dependency_inversion"],
+    "refactored_code": "public class PaymentHandler { private readonly IPaymentGateway _gateway; public PaymentHandler(IPaymentGateway gateway) => _gateway = gateway; public bool Process(string card, decimal amount) => _gateway.Charge(card, amount); }",
+    "patterns": ["dependency_injection", "dependency_inversion_principle", "testability"],
+    "testability_score": 0.95,
+    "explanation": "Introduced IPaymentGateway interface and constructor injection, enabling mock testing"
+  },
+  {
+    "prompt": "Fix magic numbers in discount calculation",
+    "original_code": "public decimal Calculate(decimal price) { if (price > 100) return price * 0.9m; return price * 0.95m; }",
+    "issues": ["magic_numbers", "poor_readability", "hard_to_maintain", "no_business_logic_clarity"],
+    "refactored_code": "public class DiscountCalculator { private const decimal VIP_THRESHOLD = 100m; private const decimal VIP_DISCOUNT_RATE = 0.9m; private const decimal STANDARD_DISCOUNT_RATE = 0.95m; public decimal Calculate(decimal price) => price > VIP_THRESHOLD ? price * VIP_DISCOUNT_RATE : price * STANDARD_DISCOUNT_RATE; }",
+    "patterns": ["meaningful_constants", "self_documenting_code"],
+    "testability_score": 0.92,
+    "explanation": "Replaced magic numbers with named constants, improving readability and maintainability"
+  },
+  {
+    "prompt": "Break down this long parameter list",
+    "original_code": "public void Create(string name, string email, string phone, string address, string city, string state, string zip, string country, string preferences) { /*...*/ }",
+    "issues": ["long_parameter_list", "code_smell", "hard_to_use", "poor_abstraction"],
+    "refactored_code": "public class User { public string Name { get; set; } public ContactInfo Contact { get; set; } public Address Address { get; set; } public string Preferences { get; set; } } public class ContactInfo { public string Email { get; set; } public string Phone { get; set; } } public class Address { public string Street { get; set; } public string City { get; set; } public string State { get; set; } public string Zip { get; set; } public string Country { get; set; } } public void Create(User user) { /*...*/ }",
+    "patterns": ["introduce_parameter_object", "composition"],
+    "testability_score": 0.88,
+    "explanation": "Grouped related parameters into cohesive objects, reducing complexity"
+  },
+  {
+    "prompt": "Refactor untestable static database call",
+    "original_code": "public class UserService { public User GetUser(int id) { return Database.ExecuteQuery($\"SELECT * FROM Users WHERE Id = {id}\").FirstOrDefault(); } }",
+    "issues": ["static_dependency", "untestable", "sql_injection_risk", "tight_coupling"],
+    "refactored_code": "public class UserService { private readonly IUserRepository _repository; public UserService(IUserRepository repository) => _repository = repository; public User GetUser(int id) => _repository.GetById(id); } public interface IUserRepository { User GetById(int id); }",
+    "patterns": ["repository_pattern", "dependency_injection", "separation_of_concerns"],
+    "testability_score": 0.97,
+    "explanation": "Introduced repository abstraction, enabling unit testing and preventing SQL injection"
+  },
+  {
+    "prompt": "Fix god object with too many responsibilities",
+    "original_code": "public class OrderManager { public void ProcessOrder() { ValidateOrder(); CalculateTax(); ChargePayment(); SendEmail(); UpdateInventory(); GenerateInvoice(); } }",
+    "issues": ["god_object", "violates_srp", "high_coupling", "hard_to_test", "hard_to_maintain"],
+    "refactored_code": "public class OrderProcessor { private readonly IOrderValidator _validator; private readonly ITaxCalculator _taxCalc; private readonly IPaymentService _payment; private readonly INotificationService _notification; private readonly IInventoryService _inventory; private readonly IInvoiceGenerator _invoiceGen; public OrderProcessor(IOrderValidator validator, ITaxCalculator taxCalc, IPaymentService payment, INotificationService notification, IInventoryService inventory, IInvoiceGenerator invoiceGen) { _validator = validator; _taxCalc = taxCalc; _payment = payment; _notification = notification; _inventory = inventory; _invoiceGen = invoiceGen; } public void Process(Order order) { _validator.Validate(order); var tax = _taxCalc.Calculate(order); _payment.Charge(order.Total + tax); _notification.SendConfirmation(order); _inventory.Update(order); _invoiceGen.Generate(order); } }",
+    "patterns": ["single_responsibility_principle", "dependency_injection", "facade_pattern"],
+    "testability_score": 0.94,
+    "explanation": "Decomposed god object into focused services, each with single responsibility"
+  },
+  {
+    "prompt": "Remove feature envy code smell",
+    "original_code": "public class Invoice { public decimal CalculateTotal(Order order) { decimal total = 0; foreach (var item in order.Items) { total += item.Price * item.Quantity; } total -= order.Discount; return total; } }",
+    "issues": ["feature_envy", "misplaced_responsibility", "violates_tell_dont_ask"],
+    "refactored_code": "public class Order { public List<OrderItem> Items { get; set; } public decimal Discount { get; set; } public decimal CalculateTotal() { decimal total = Items.Sum(item => item.GetSubtotal()); return total - Discount; } } public class OrderItem { public decimal Price { get; set; } public int Quantity { get; set; } public decimal GetSubtotal() => Price * Quantity; }",
+    "patterns": ["tell_dont_ask", "encapsulation", "responsibility_assignment"],
+    "testability_score": 0.90,
+    "explanation": "Moved calculation logic to Order class where it belongs, following 'tell don't ask'"
+  },
+  {
+    "prompt": "Fix primitive obsession with value objects",
+    "original_code": "public class User { public string Email { get; set; } public bool IsValidEmail() { return Email.Contains(\"@\") && Email.Contains(\".\"); } }",
+    "issues": ["primitive_obsession", "weak_validation", "scattered_logic", "poor_encapsulation"],
+    "refactored_code": "public class User { public Email Email { get; set; } } public class Email { private readonly string _value; public Email(string value) { if (!IsValid(value)) throw new ArgumentException(\"Invalid email\"); _value = value; } private static bool IsValid(string email) => !string.IsNullOrWhiteSpace(email) && email.Contains(\"@\") && email.Contains(\".\") && email.IndexOf(\"@\") < email.LastIndexOf(\".\"); public override string ToString() => _value; public static implicit operator string(Email email) => email._value; }",
+    "patterns": ["value_object", "domain_driven_design", "encapsulation"],
+    "testability_score": 0.93,
+    "explanation": "Created Email value object with encapsulated validation logic"
+  },
+  {
+    "prompt": "Refactor switch statement to polymorphism",
+    "original_code": "public decimal CalculateShipping(string type, decimal weight) { switch(type) { case \"Standard\": return weight * 0.5m; case \"Express\": return weight * 1.5m; case \"Overnight\": return weight * 3.0m; default: throw new ArgumentException(); } }",
+    "issues": ["switch_statement_smell", "violates_ocp", "hard_to_extend", "repetitive_logic"],
+    "refactored_code": "public interface IShippingStrategy { decimal Calculate(decimal weight); } public class StandardShipping : IShippingStrategy { public decimal Calculate(decimal weight) => weight * 0.5m; } public class ExpressShipping : IShippingStrategy { public decimal Calculate(decimal weight) => weight * 1.5m; } public class OvernightShipping : IShippingStrategy { public decimal Calculate(decimal weight) => weight * 3.0m; } public class ShippingCalculator { private readonly IShippingStrategy _strategy; public ShippingCalculator(IShippingStrategy strategy) => _strategy = strategy; public decimal Calculate(decimal weight) => _strategy.Calculate(weight); }",
+    "patterns": ["strategy_pattern", "open_closed_principle", "polymorphism"],
+    "testability_score": 0.96,
+    "explanation": "Replaced switch with strategy pattern, allowing extension without modification"
+  },
+  {
+    "prompt": "Fix inappropriate intimacy between classes",
+    "original_code": "public class Customer { public List<Order> Orders { get; set; } } public class OrderReport { public decimal GetTotalRevenue(Customer customer) { decimal total = 0; foreach (var order in customer.Orders) { foreach (var item in order.Items) { total += item.Price * item.Quantity; } } return total; } }",
+    "issues": ["inappropriate_intimacy", "law_of_demeter_violation", "tight_coupling"],
+    "refactored_code": "public class Customer { private List<Order> _orders = new List<Order>(); public decimal GetTotalRevenue() => _orders.Sum(o => o.GetTotal()); } public class Order { private List<OrderItem> _items = new List<OrderItem>(); public decimal GetTotal() => _items.Sum(i => i.GetSubtotal()); } public class OrderItem { public decimal Price { get; set; } public int Quantity { get; set; } public decimal GetSubtotal() => Price * Quantity; } public class OrderReport { public decimal GetTotalRevenue(Customer customer) => customer.GetTotalRevenue(); }",
+    "patterns": ["law_of_demeter", "encapsulation", "tell_dont_ask"],
+    "testability_score": 0.91,
+    "explanation": "Reduced coupling by having each object manage its own data and calculations"
+  },
+  {
+    "prompt": "Eliminate duplicate code with template method",
+    "original_code": "public class CsvReporter { public void Generate() { OpenFile(); WriteHeader(); WriteData(); CloseFile(); } } public class XmlReporter { public void Generate() { OpenFile(); WriteXmlHeader(); WriteXmlData(); CloseFile(); } }",
+    "issues": ["duplicate_code", "violates_dry", "poor_abstraction", "hard_to_maintain"],
+    "refactored_code": "public abstract class ReportGenerator { public void Generate() { OpenFile(); WriteHeader(); WriteData(); CloseFile(); } protected abstract void WriteHeader(); protected abstract void WriteData(); private void OpenFile() { /* common logic */ } private void CloseFile() { /* common logic */ } } public class CsvReporter : ReportGenerator { protected override void WriteHeader() { /* CSV specific */ } protected override void WriteData() { /* CSV specific */ } } public class XmlReporter : ReportGenerator { protected override void WriteHeader() { /* XML specific */ } protected override void WriteData() { /* XML specific */ } }",
+    "patterns": ["template_method_pattern", "dont_repeat_yourself", "inheritance"],
+    "testability_score": 0.89,
+    "explanation": "Extracted common algorithm into base class with template method pattern"
+  },
+  {
+    "prompt": "Refactor lazy class into meaningful abstraction",
+    "original_code": "public class DataHelper { public string Format(string data) { return data.Trim(); } }",
+    "issues": ["lazy_class", "weak_abstraction", "unnecessary_indirection", "poor_naming"],
+    "refactored_code": "// Option 1: Eliminate if truly unnecessary\npublic class UserService { public User CreateUser(string name) { return new User { Name = name.Trim() }; } }\n\n// Option 2: Enhance with real responsibility\npublic class UserInputSanitizer { public string Sanitize(string input) { return input?.Trim().Replace(\"<\", \"\").Replace(\">\", \"\") ?? string.Empty; } public bool IsValid(string input) => !string.IsNullOrWhiteSpace(Sanitize(input)); }",
+    "patterns": ["meaningful_abstraction", "single_responsibility", "cohesion"],
+    "testability_score": 0.85,
+    "explanation": "Either eliminated unnecessary class or gave it meaningful responsibility"
+  },
+  {
+    "prompt": "Fix data clump with cohesive object",
+    "original_code": "public void CreateInvoice(string custName, string custEmail, string custPhone, string custAddress) { /* ... */ } public void SendReceipt(string custName, string custEmail, string custPhone, string custAddress) { /* ... */ } public void UpdateAccount(string custName, string custEmail, string custPhone, string custAddress) { /* ... */ }",
+    "issues": ["data_clump", "repeated_parameters", "poor_cohesion", "violates_dry"],
+    "refactored_code": "public class CustomerInfo { public string Name { get; set; } public string Email { get; set; } public string Phone { get; set; } public string Address { get; set; } } public void CreateInvoice(CustomerInfo customer) { /* ... */ } public void SendReceipt(CustomerInfo customer) { /* ... */ } public void UpdateAccount(CustomerInfo customer) { /* ... */ }",
+    "patterns": ["introduce_parameter_object", "cohesion", "dry_principle"],
+    "testability_score": 0.87,
+    "explanation": "Grouped related data into cohesive CustomerInfo object, reducing repetition"
+  }
+]

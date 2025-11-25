@@ -1,0 +1,27 @@
+{
+  "config": {
+    "attention_type": "sparse_global",
+    "adapter_type": "lora",
+    "num_iterations": 3,
+    "num_epochs": 20
+  },
+  "history": [
+    {
+      "iteration": 1,
+      "generated": 12,
+      "accepted": 11,
+      "trained": true,
+      "avg_quality_score": 0.8727272727272727,
+      "train_loss": 1.0150240262349446
+    },
+    {
+      "iteration": 2,
+      "generated": 12,
+      "accepted": 11,
+      "trained": true,
+      "avg_quality_score": 0.8727272727272727,
+      "train_loss": 1.0156839688618977
+    }
+  ],
+  "total_examples": 22
+}
