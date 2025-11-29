@@ -1,0 +1,36 @@
+"""
+Neural Swarm Adapter (Stub)
+
+ACAS rule: This module must NEVER block startup or hang the main handler.
+All heavy work must be behind explicit calls with timeouts.
+"""
+
+from __future__ import annotations
+from typing import Dict, Any
+
+# In the future you can load models here, but keep it cheap / lazy.
+NEURAL_AVAILABLE = False  # Flip to True only when you really wire a model.
+
+
+def analyze_text_neural(text: str) -> Dict[str, Any]:
+    """
+    Stub neural analysis.
+
+    Returns a structure compatible with HASH_SWARM, but marked as NEURAL_STUB.
+    """
+    # IMPORTANT: This must always be fast and never raise here.
+    length = len(text or "")
+
+    # Fake-but-safe scores for now
+    return {
+        "engine": "NEURAL_STUB",
+        "length": length,
+        "scores": {
+            "emotion": 0.5,
+            "security": 0.5,
+            "quality": 0.5,
+        },
+        "notes": [
+            "Neural path not yet implemented; using stub response.",
+        ],
+    }

@@ -1,0 +1,99 @@
+GUARDIAN ANGEL CASCADE SYSTEM - Distribution Files
+==================================================
+
+CORE FILES (Required):
+  neural/                               - Neural network modules and bridges
+    ├── guardian_swarm.py              - ConsciousSwarm implementation (9,789 params)
+    ├── guardian_neural_bridge.py      - CASCADE trigger logic (quality range detection)
+    ├── multi_voice_debate.py          - PRIMARY DEMO: 3-agent debate system
+    ├── multi_voice.py                 - Simple 3-agent voices (no debate)
+    └── bridge_live.py                 - Single Guardian voice (user created)
+
+  guardian_server.py                   - Main CASCADE server (FastAPI, port 11436)
+  guardian_swarm_h64.pt                - Trained model checkpoint (64 hidden dims)
+  
+DOCUMENTATION:
+  README-DISTRIBUTION.md               - Complete user guide and API reference
+  LIVE-NEURAL-README.md                - Technical architecture and proof of live inference
+  
+DEPENDENCIES:
+  requirements-distribution.txt        - Minimal clean dependencies (torch, fastapi, etc.)
+  
+SETUP:
+  SETUP-DISTRIBUTION.cmd               - Automated Windows installer
+  
+DEMO SCRIPTS:
+  Chat-Guardian-Gemma.cmd              - Single Guardian voice chat (Windows)
+  Test-LIVE-vs-HASH.ps1                - Benchmark: neural vs hash comparison
+  
+TEST SUITE:
+  test_guardian_angel.py               - 5 tests: deterministic, performance, SQL detection
+  validate_checkpoint.py               - Verify model checkpoint integrity
+
+OPTIONAL FILES (Not Required for Distribution):
+  Start-GuardianCascade.ps1            - PowerShell cascade server launcher
+  pure_training_engine.py              - Training script (if retraining needed)
+
+
+RECOMMENDED DISTRIBUTION PACKAGE:
+==================================
+Include these files in ZIP:
+
+ESSENTIAL:
+  - neural/ (entire directory)
+  - guardian_server.py
+  - guardian_swarm_h64.pt
+  - README-DISTRIBUTION.md
+  - requirements-distribution.txt
+  - SETUP-DISTRIBUTION.cmd
+
+DEMOS (Recommended):
+  - Chat-Guardian-Gemma.cmd
+  - Test-LIVE-vs-HASH.ps1
+  - test_guardian_angel.py
+
+DOCUMENTATION (Optional but Useful):
+  - LIVE-NEURAL-README.md
+  - validate_checkpoint.py
+
+
+DISTRIBUTION CHECKLIST:
+=======================
+✅ Neural network modules (9,789 params)
+✅ Trained checkpoint (guardian_swarm_h64.pt)
+✅ CASCADE server with 3 modes
+✅ Multi-voice debate system
+✅ Complete documentation
+✅ Automated setup script
+✅ Working demos
+✅ Test suite
+
+VALIDATION:
+===========
+Before distribution, verify:
+1. Run: python test_guardian_angel.py (should pass 5/5 tests)
+2. Run: python neural\multi_voice_debate.py (should load swarm + debate)
+3. Check: guardian_swarm_h64.pt exists (should be ~40KB)
+4. Test: SETUP-DISTRIBUTION.cmd on clean system
+
+
+SIZE ESTIMATES:
+===============
+neural/ directory:          ~50 KB (Python code)
+guardian_server.py:         ~15 KB
+guardian_swarm_h64.pt:      ~40 KB (model checkpoint)
+Documentation:              ~100 KB (README + technical docs)
+Demo scripts:               ~20 KB
+Test suite:                 ~30 KB
+                           --------
+Total ZIP size:            ~200-300 KB (compressed)
+
+
+EXTERNAL DEPENDENCIES (Not Included):
+======================================
+User must have installed:
+- Python 3.8+ (tested on 3.11)
+- Ollama (for multi-voice LLM integration)
+- gemma3:4b model (or any compatible Ollama model)
+
+Setup script will check for these and provide instructions if missing.
